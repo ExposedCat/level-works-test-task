@@ -27,12 +27,56 @@ function createCell(x, y) {
 	cell.classList.add('cell')
 	cell.dataset.x = x
 	cell.dataset.y = y
+	cell.dataset.clicks = 0
 	return cell
 }
 
 /**
  *
- * @param {String} containerSelector - Container to render grid in
+ * @param {HTMLDivElement} cell - Cell to increase clicks
+ *
+ * @return {void}
+ */
+function increaseClicksCross(cell) {
+	const { x, y } = cell.dataset
+	const increase = (x, y) => {
+		const selector = `.cell[data-x="${x}"][data-y="${y}"]`
+		const cell = document.querySelector(selector)
+		cell.innerText = ++cell.dataset.clicks
+	}
+	increase(x, y)
+	for (let i = 0; i < 50; ++i) {
+		if (i != x) {
+			increase(i, y)
+		}
+		if (i != y) {
+			increase(x, i)
+		}
+	}
+}
+
+/**
+ *
+ * @param {String} containerSelector - Selector of container to handle cell clicks in
+ * @param {(cell: HTMLDivElement) => void} callback - Function to call on click, takes cell as argument
+ *
+ * @return {void}
+ */
+function handleCellClicks(containerSelector, callback) {
+	let container = document.querySelector(containerSelector)
+	if (!container) {
+		throw new Error(`Container is not found`)
+	}
+	container.addEventListener('click', ({ target }) => {
+		if (target.classList.contains('cell')) {
+			callback(target)
+		}
+	})
+}
+
+/**
+ *
+ * @param {String} containerSelector - Selector of container to render grid in
  *
  * @return {void}
  */
@@ -52,3 +96,4 @@ function generateGrid(containerSelector) {
 }
 
 generateGrid('.grid')
+handleCellClicks('.grid', increaseClicksCross)
