@@ -25,7 +25,7 @@ function createCell(x, y) {
 	return cell
 }
 
-async function checkAffectedCells(x, y, grid, horizontal) {
+function processNewFibonnaciLines(x, y, grid, horizontal) {
 	let main = x
 	let limit = y
 	if (horizontal) {
@@ -37,20 +37,29 @@ async function checkAffectedCells(x, y, grid, horizontal) {
 	}
 	const isFibonacci = grid.checkLineFromPoint(x, y, horizontal)
 	if (isFibonacci) {
-		const axis = horizontal ? 'x' : 'y'
-		await grid.highlightLine(axis, main, 'green', 500)
 		grid.clearLine(main, horizontal)
+		return {
+			axis: horizontal ? 'y' : 'x',
+			main,
+			horizontal
+		}
 	}
 }
 
-function setLineColor(axis, coord, color) {
+function setLinesColor(lines, color) {
 	const styles = document.querySelector('#styles')
-	const query = `data-${axis}="${coord}"`
-	const selector = `\\.cell\\[${query}\\]`
-	const field = `background`
-	styles.innerText = styles.innerText.replace(
-		new RegExp(`${selector}{${field}:.+?}`),
-		''
-	)
-	styles.innerText += `.cell[${query}]{${field}:${color}}`
+	let query = ``
+	for (const line of lines) {
+		if (!line) {
+			continue
+		}
+		query += `.cell[data-${line.axis}="${line.main}"],`
+	}
+	styles.innerText = `${query.slice(0, -1)}{background:${color}}`
+}
+
+function pushValid(array, item) {
+	if (item !== undefined) {
+		array.push(item)
+	}
 }

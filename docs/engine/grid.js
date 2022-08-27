@@ -1,32 +1,36 @@
 class Grid {
 	#matrix
+	#element
 
 	constructor() {
 		this.#matrix = []
+		this.#element = document.querySelector(`.grid`)
+		if (!this.#element) {
+			throw new Error(`Container not found`)
+		}
 		for (let i = 0; i < 50; ++i) {
 			this.#matrix[i] = new Array(50).fill(0)
 		}
-		this.render()
+		this.#render()
 	}
 
-	render() {
+	setCursor(name) {
+		this.#element.style.cursor = name
+	}
+
+	#render() {
 		const styles = document.querySelector('#styles')
-		let container = document.querySelector(`.grid`)
-		if (!container) {
-			throw new Error(`Container not found`)
-		}
-		const lineStyle = (axis, coord) => `.cell[data-${axis}="${coord}"]{background:none}`
+		const lineStyle = (axis, coord) =>
+			`.cell[data-${axis}="${coord}"]{background:none}`
 		for (let y = 0; y < 50; ++y) {
 			const row = createRow()
 			styles.innerText += lineStyle('x', y) + lineStyle('y', y)
 			for (let x = 0; x < 50; ++x) {
 				const cell = createCell(x, y)
 				row.appendChild(cell)
-				console.log(styles.innerText)
 			}
-			container.appendChild(row)
+			this.#element.appendChild(row)
 		}
-		console.log(styles.innerText)
 	}
 
 	getCell(x, y, getDOMElement = false) {
@@ -93,7 +97,7 @@ class Grid {
 		element.innerText = ++this.#matrix[y][x]
 	}
 
-	async clearLine(coord, horizontal = false) {
+	clearLine(coord, horizontal = false) {
 		for (let c = 0; c < 50; ++c) {
 			const x = horizontal ? c : coord
 			const y = horizontal ? coord : c
@@ -103,27 +107,37 @@ class Grid {
 		}
 	}
 
-	async highlightLine(axis, coord, color, time) {
-		setLineColor(axis, coord, color)
+	async highlightLines(lines, color, time) {
+		if (!lines.length) {
+			return
+		}
+		setLinesColor(lines, color)
 		return new Promise(resolve => {
 			setTimeout(() => {
-				setLineColor(axis, coord, 'none')
+				setLinesColor(lines, 'none')
 				resolve()
 			}, time)
 		})
 	}
 
 	async highlightCross(x, y, color, time) {
-		this.highlightLine('x', x, color, time)
-		return this.highlightLine('y', y, color, time)
+		return this.highlightLines(
+			[
+				{ axis: 'x', main: x },
+				{ axis: 'y', main: y }
+			],
+			color,
+			time
+		)
 	}
 
 	forLineAt(x, y, callback, horizontal, offsets = [0, 0, 0]) {
+		let results = []
 		for (let coord = 0; coord < 50 - offsets[2]; ++coord) {
 			if (horizontal) {
-				callback(coord, y)
+				pushValid(results, callback(coord, y))
 			} else {
-				callback(x, coord)
+				pushValid(results, callback(x, coord))
 			}
 		}
 		const axis1 = horizontal ? x : y
@@ -134,13 +148,14 @@ class Grid {
 			if (i != axis2) {
 				for (let j = firstLimit; j <= secondLimit; ++j) {
 					if (horizontal) {
-						callback(j, i)
+						pushValid(results, callback(j, i))
 					} else {
-						callback(i, j)
+						pushValid(results, callback(i, j))
 					}
 				}
 			}
 		}
+		return results
 	}
 
 	forCrossAt(
