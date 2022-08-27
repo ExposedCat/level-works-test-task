@@ -27,7 +27,6 @@ body {
 	align-items: stretch;
 	flex-direction: column;
 	user-select: none;
-	cursor: pointer;
 }
 
 .row {
@@ -49,6 +48,7 @@ body {
 	display: flex;
 	justify-content: center;
 	align-items: center;
+	cursor: pointer;
 	border-radius: 5px;
 	margin: 1px;
 }

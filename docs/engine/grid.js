@@ -1,6 +1,7 @@
 class Grid {
 	#matrix
 	#element
+	#animationTimer
 
 	constructor() {
 		this.#matrix = []
@@ -14,17 +15,9 @@ class Grid {
 		this.#render()
 	}
 
-	setCursor(name) {
-		this.#element.style.cursor = name
-	}
-
 	#render() {
-		const styles = document.querySelector('#styles')
-		const lineStyle = (axis, coord) =>
-			`.cell[data-${axis}="${coord}"]{background:none}`
 		for (let y = 0; y < 50; ++y) {
 			const row = createRow()
-			styles.innerText += lineStyle('x', y) + lineStyle('y', y)
 			for (let x = 0; x < 50; ++x) {
 				const cell = createCell(x, y)
 				row.appendChild(cell)
@@ -113,7 +106,8 @@ class Grid {
 		}
 		setLinesColor(lines, color)
 		return new Promise(resolve => {
-			setTimeout(() => {
+			clearTimeout(this.#animationTimer)
+			this.#animationTimer = setTimeout(() => {
 				setLinesColor(lines, 'none')
 				resolve()
 			}, time)

@@ -1,11 +1,5 @@
 let grid = new Grid()
-let frozen = false
 handleClicks('.grid', 'cell', async cell => {
-	if (!cell || frozen) {
-		return
-	}
-	frozen = true
-	grid.setCursor('not-allowed')
 	let { x, y } = cell.dataset
 	x = Number(x)
 	y = Number(y)
@@ -23,6 +17,4 @@ handleClicks('.grid', 'cell', async cell => {
 		)
 		await grid.highlightLines(lines, 'green', 1000)
 	}
-	frozen = false
-	grid.setCursor('pointer')
 })
