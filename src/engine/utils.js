@@ -24,3 +24,19 @@ function createCell(x, y) {
 	cell.innerText = '·'
 	return cell
 }
+
+function checkAffectedCells(x, y, grid, horizontal) {
+	let main = x
+	let limit = y
+	if (horizontal) {
+		main = y
+		limit = x
+	}
+	if (limit > 47) {
+		return
+	}
+	const isFibonacci = grid.checkLineFromPoint(x, y, horizontal)
+	if (isFibonacci) {
+		grid.clearLine(main, horizontal)
+	}
+}

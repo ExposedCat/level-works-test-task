@@ -57,26 +57,24 @@ class Grid {
 	}
 
 	checkLineFromPoint(x, y, horizontal = true) {
+		let axis1 = y
+		let axis2 = x
 		if (horizontal) {
-			if (x > 45) {
+			axis1 = x
+			axis2 = y
+		}
+		if (axis1 > 45) {
+			return false
+		}
+		for (let i = axis1; i <= axis1 + 2; ++i) {
+			let cells
+			if (horizontal) {
+				cells = this.getCellTwoPrev(i + 2, axis2, true)
+			} else {
+				cells = this.getCellTwoPrev(axis2, i + 2, false)
+			}
+			if (!isFibonacci(cells)) {
 				return false
-			}
-			for (let cellX = x; cellX <= x + 2; ++cellX) {
-				const cells = this.getCellTwoPrev(cellX + 2, y, true)
-				if (!isFibonacci(cells)) {
-					return false
-				}
-			}
-		} else {
-			// TODO: Get rid of code duplicates
-			if (y > 45) {
-				return false
-			}
-			for (let cellY = y; cellY <= y + 2; ++cellY) {
-				const cells = this.getCellTwoPrev(x, cellY + 2, false)
-				if (!isFibonacci(cells)) {
-					return false
-				}
 			}
 		}
 		return true
@@ -90,12 +88,10 @@ class Grid {
 		element.innerText = ++this.#matrix[y][x]
 	}
 
-	// TODO: Move value setter to separate function
 	clearLine(coordinate, horizontal = false) {
 		for (let c = 0; c < 50; ++c) {
 			const x = horizontal ? c : coordinate
 			const y = horizontal ? coordinate : c
-			console.log(`Clear ${x};${y}`)
 			this.#matrix[y][x] = 0
 			const { element } = this.getCell(x, y, true)
 			element.innerHTML = ''
@@ -108,6 +104,31 @@ class Grid {
 			return
 		}
 		element.style.background = color
+	}
+
+	forLineAt(x, y, callback, horizontal, offsets = [0, 0, 0]) {
+		for (let coord = 0; coord < 50 - offsets[2]; ++coord) {
+			if (horizontal) {
+				callback(coord, y)
+			} else {
+				callback(x, coord)
+			}
+		}
+		const axis1 = horizontal ? x : y
+		const axis2 = horizontal ? y : x
+		const firstLimit = axis1 < offsets[0] ? 0 : axis1 - offsets[0]
+		const secondLimit = axis1 > 49 ? 49 : axis1 + offsets[1]
+		for (let i = 0; i < 50; ++i) {
+			if (i != axis2) {
+				for (let j = firstLimit; j <= secondLimit; ++j) {
+					if (horizontal) {
+						callback(j, i)
+					} else {
+						callback(i, j)
+					}
+				}
+			}
+		}
 	}
 
 	forCrossAt(
@@ -125,34 +146,18 @@ class Grid {
 	) {
 		// Horizontal
 		if (callbacks.horizontal) {
-			for (let cellX = 0; cellX < 50 - offsets.centerRight; ++cellX) {
-				callbacks.horizontal(cellX, y)
-			}
-			const leftX = x < offsets.left ? 0 : x - offsets.left
-			const rightX = x > 49 ? 49 : x + offsets.right
-			for (let cellY = 0; cellY < 50; ++cellY) {
-				if (cellY != y) {
-					for (let x = leftX; x <= rightX; ++x) {
-						callbacks.horizontal(x, cellY)
-					}
-				}
-			}
+			this.forLineAt(x, y, callbacks.horizontal, true, [
+				offsets.left,
+				offsets.right,
+				offsets.centerRight
+			])
 		}
-		// TODO: Get rid of code duplicates
-		// Vertical
 		if (callbacks.vertical) {
-			for (let cellY = 0; cellY < 50 - offsets.centerBottom; ++cellY) {
-				callbacks.vertical(x, cellY)
-			}
-			const topY = y < offsets.top ? 0 : y - offsets.top
-			const bottomY = y > 49 ? 49 : y + offsets.bottom
-			for (let cellX = 0; cellX < 50; ++cellX) {
-				if (cellX != x) {
-					for (let y = topY; y <= bottomY; ++y) {
-						callbacks.vertical(cellX, y)
-					}
-				}
-			}
+			this.forLineAt(x, y, callbacks.vertical, false, [
+				offsets.top,
+				offsets.bottom,
+				offsets.centerBottom
+			])
 		}
 	}
 }
