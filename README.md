@@ -49,13 +49,15 @@ git clone https://github.com/ExposedCat/level-works-test-task.git
 ```bash
 cd ./level-works-test-task
 ```
+
 3. Open `src/index.html` via browser (example: <a href="https://www.mozilla.org/en-US/firefox/new/">Firefox</a>):
 
 ```bash
 firefox ./src/index.html
 ```
+
 <div align="center">
     <h2>via Browser (Pages)</h2>
 </div>
 
-1. Go to the <a href="TODO: publish">GitHub Page of this repo</a>
+1. Go to the <a href="https://exposedcat.github.io/level-works-test-task">GitHub Page of this repo</a>
