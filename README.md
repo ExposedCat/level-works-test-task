@@ -50,10 +50,10 @@ git clone https://github.com/ExposedCat/level-works-test-task.git
 cd ./level-works-test-task
 ```
 
-3. Open `src/index.html` via browser (example: <a href="https://www.mozilla.org/en-US/firefox/new/">Firefox</a>):
+3. Open `docs/index.html` via browser (example: <a href="https://www.mozilla.org/en-US/firefox/new/">Firefox</a>):
 
 ```bash
-firefox ./src/index.html
+firefox ./docs/index.html
 ```
 
 <div align="center">
