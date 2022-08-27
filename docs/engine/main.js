@@ -1,10 +1,16 @@
 let grid = new Grid()
-handleClicks('.grid', 'cell', cell => {
+let frozen = false
+handleClicks('.grid', 'cell', async cell => {
+	if (frozen) {
+		return
+	}
+	frozen = true
 	let { x, y } = cell.dataset
 	x = Number(x)
 	y = Number(y)
 	// Increase cell values
 	grid.forLineAt(x, y, grid.increaseCell.bind(grid), true)
+	await grid.highlightCross(x, y, 'yellow', 500)
 	// Check for Fibonacci sequences
 	for (const horizontal of [true, false]) {
 		grid.forLineAt(
@@ -15,4 +21,5 @@ handleClicks('.grid', 'cell', cell => {
 			[5, 5, 2]
 		)
 	}
+	frozen = false
 })

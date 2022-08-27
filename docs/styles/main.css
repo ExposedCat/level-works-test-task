@@ -7,7 +7,7 @@
 html,
 body {
 	min-height: 100%;
-    padding: 20px;
+    padding: 25px;
 }
 
 html {
@@ -31,9 +31,9 @@ body {
 
 .row {
 	width: 100%;
-    min-width: calc(20px * 50);
+    min-width: calc(25px * 50);
 	height: calc(100% / 50);
-    min-height: 20px;
+    min-height: 25px;
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -41,12 +41,14 @@ body {
 
 .cell {
 	width: calc(100% / 50);
-    min-width: 20px;
+    min-width: 25px;
 	height: 100%;
-    min-height: 20px;
+    min-height: 25px;
 	border: 1px solid black;
 	display: flex;
 	justify-content: center;
 	align-items: center;
     cursor: pointer;
+	border-radius: 5px;
+	margin: 1px;
 }

@@ -10,18 +10,23 @@ class Grid {
 	}
 
 	render() {
+		const styles = document.querySelector('#styles')
 		let container = document.querySelector(`.grid`)
 		if (!container) {
 			throw new Error(`Container not found`)
 		}
+		const lineStyle = (axis, coord) => `.cell[data-${axis}="${coord}"]{background:none}`
 		for (let y = 0; y < 50; ++y) {
 			const row = createRow()
+			styles.innerText += lineStyle('x', y) + lineStyle('y', y)
 			for (let x = 0; x < 50; ++x) {
 				const cell = createCell(x, y)
 				row.appendChild(cell)
+				console.log(styles.innerText)
 			}
 			container.appendChild(row)
 		}
+		console.log(styles.innerText)
 	}
 
 	getCell(x, y, getDOMElement = false) {
@@ -88,22 +93,29 @@ class Grid {
 		element.innerText = ++this.#matrix[y][x]
 	}
 
-	clearLine(coordinate, horizontal = false) {
+	async clearLine(coord, horizontal = false) {
 		for (let c = 0; c < 50; ++c) {
-			const x = horizontal ? c : coordinate
-			const y = horizontal ? coordinate : c
+			const x = horizontal ? c : coord
+			const y = horizontal ? coord : c
 			this.#matrix[y][x] = 0
 			const { element } = this.getCell(x, y, true)
 			element.innerHTML = ''
 		}
 	}
 
-	highlightCell(x, y, color) {
-		let { element } = this.getCell(x, y, true)
-		if (!element) {
-			return
-		}
-		element.style.background = color
+	async highlightLine(axis, coord, color, time) {
+		setLineColor(axis, coord, color)
+		return new Promise(resolve => {
+			setTimeout(() => {
+				setLineColor(axis, coord, 'none')
+				resolve()
+			}, time)
+		})
+	}
+
+	async highlightCross(x, y, color, time) {
+		this.highlightLine('x', x, color, time)
+		return this.highlightLine('y', y, color, time)
 	}
 
 	forLineAt(x, y, callback, horizontal, offsets = [0, 0, 0]) {

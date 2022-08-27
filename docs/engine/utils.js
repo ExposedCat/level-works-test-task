@@ -21,11 +21,11 @@ function createCell(x, y) {
 	cell.classList.add('cell')
 	cell.dataset.x = x
 	cell.dataset.y = y
-	cell.innerText = '·'
+	cell.innerText = ''
 	return cell
 }
 
-function checkAffectedCells(x, y, grid, horizontal) {
+async function checkAffectedCells(x, y, grid, horizontal) {
 	let main = x
 	let limit = y
 	if (horizontal) {
@@ -37,6 +37,20 @@ function checkAffectedCells(x, y, grid, horizontal) {
 	}
 	const isFibonacci = grid.checkLineFromPoint(x, y, horizontal)
 	if (isFibonacci) {
+		const axis = horizontal ? 'x' : 'y'
+		await grid.highlightLine(axis, main, 'green', 500)
 		grid.clearLine(main, horizontal)
 	}
+}
+
+function setLineColor(axis, coord, color) {
+	const styles = document.querySelector('#styles')
+	const query = `data-${axis}="${coord}"`
+	const selector = `\\.cell\\[${query}\\]`
+	const field = `background`
+	styles.innerText = styles.innerText.replace(
+		new RegExp(`${selector}{${field}:.+?}`),
+		''
+	)
+	styles.innerText += `.cell[${query}]{${field}:${color}}`
 }
