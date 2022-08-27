@@ -17,17 +17,22 @@ class Grid {
 
 	#render() {
 		for (let y = 0; y < 50; ++y) {
-			const row = createRow()
+			const row = DomUtils.createRow()
 			for (let x = 0; x < 50; ++x) {
-				const cell = createCell(x, y)
+				const cell = DomUtils.createCell(Point(x, y))
 				row.appendChild(cell)
 			}
 			this.#element.appendChild(row)
 		}
 	}
 
-	getCell(x, y, getDOMElement = false) {
-		if (!this.#matrix[y] || this.#matrix[y][x] === undefined) {
+	getContainer() {
+		return this.#element
+	}
+
+	getCell(point, getDOMElement = false) {
+		const row = this.#matrix[point?.y]
+		if (!row || row[point.x] === undefined) {
 			return {
 				element: null,
 				clicks: 0
@@ -35,45 +40,45 @@ class Grid {
 		}
 		let cell = null
 		if (getDOMElement) {
-			const selector = `.cell[data-x="${x}"][data-y="${y}"]`
+			const selector = `.cell[data-x="${point.x}"][data-y="${point.y}"]`
 			cell = document.querySelector(selector)
 		}
 		return {
 			element: cell,
-			clicks: this.#matrix[y][x]
+			clicks: row[point.x]
 		}
 	}
 
-	getCellTwoPrev(x, y, horizontal = true) {
-		const cell = this.getCell(x, y)
+	getCellTwoPrev(point, isHorizontal) {
+		const cell = this.getCell(Point(point.x, point.y))
 		let prev1
 		let prev2
-		if (horizontal) {
-			prev1 = this.getCell(x - 1, y)
-			prev2 = this.getCell(x - 2, y)
+		if (isHorizontal) {
+			prev1 = this.getCell(Point(point.x - 1, point.y))
+			prev2 = this.getCell(Point(point.x - 2, point.y))
 		} else {
-			prev1 = this.getCell(x, y - 1)
-			prev2 = this.getCell(x, y - 2)
+			prev1 = this.getCell(Point(point.x, point.y - 1))
+			prev2 = this.getCell(Point(point.x, point.y - 2))
 		}
 		return [prev2, prev1, cell]
 	}
 
-	checkLineFromPoint(x, y, horizontal = true) {
-		let axis1 = y
-		let axis2 = x
-		if (horizontal) {
-			axis1 = x
-			axis2 = y
+	checkLineFromPoint(point, isHorizontal) {
+		let axis1 = point.y
+		let axis2 = point.x
+		if (isHorizontal) {
+			axis1 = point.x
+			axis2 = point.y
 		}
 		if (axis1 > 45) {
 			return false
 		}
-		for (let i = axis1; i <= axis1 + 2; ++i) {
+		for (let coord1 = axis1; coord1 <= axis1 + 2; ++coord1) {
 			let cells
-			if (horizontal) {
-				cells = this.getCellTwoPrev(i + 2, axis2, true)
+			if (isHorizontal) {
+				cells = this.getCellTwoPrev(Point(coord1 + 2, axis2), true)
 			} else {
-				cells = this.getCellTwoPrev(axis2, i + 2, false)
+				cells = this.getCellTwoPrev(Point(axis2, coord1 + 2), false)
 			}
 			if (!isFibonacci(cells)) {
 				return false
@@ -82,20 +87,20 @@ class Grid {
 		return true
 	}
 
-	increaseCell(x, y) {
-		let { element } = this.getCell(x, y, true)
+	increaseCell(point) {
+		let { element } = this.getCell(point, true)
 		if (!element) {
 			return
 		}
-		element.innerText = ++this.#matrix[y][x]
+		element.innerText = ++this.#matrix[point.y][point.x]
 	}
 
-	clearLine(coord, horizontal = false) {
-		for (let c = 0; c < 50; ++c) {
-			const x = horizontal ? c : coord
-			const y = horizontal ? coord : c
+	clearLine(coord1, isHorizontal = false) {
+		for (let coord2 = 0; coord2 < 50; ++coord2) {
+			const x = isHorizontal ? coord2 : coord1
+			const y = isHorizontal ? coord1 : coord2
 			this.#matrix[y][x] = 0
-			const { element } = this.getCell(x, y, true)
+			const { element } = this.getCell(Point(x, y), true)
 			element.innerHTML = ''
 		}
 	}
@@ -104,81 +109,34 @@ class Grid {
 		if (!lines.length) {
 			return
 		}
-		setLinesColor(lines, color)
+		DomUtils.setLinesColor(lines, color)
 		return new Promise(resolve => {
 			clearTimeout(this.#animationTimer)
 			this.#animationTimer = setTimeout(() => {
-				setLinesColor(lines, 'none')
+				DomUtils.setLinesColor(lines, 'none')
 				resolve()
 			}, time)
 		})
 	}
 
-	async highlightCross(x, y, color, time) {
-		return this.highlightLines(
-			[
-				{ axis: 'x', main: x },
-				{ axis: 'y', main: y }
-			],
-			color,
-			time
-		)
-	}
-
-	forLineAt(x, y, callback, horizontal, offsets = [0, 0, 0]) {
-		let results = []
-		for (let coord = 0; coord < 50 - offsets[2]; ++coord) {
-			if (horizontal) {
-				pushValid(results, callback(coord, y))
-			} else {
-				pushValid(results, callback(x, coord))
+	processNewFibonacciLines(point, isHorizontal) {
+		let main = point.x
+		let limit = point.y
+		if (isHorizontal) {
+			main = point.y
+			limit = point.x
+		}
+		if (limit > 47) {
+			return
+		}
+		const isFibonacci = this.checkLineFromPoint(point, isHorizontal)
+		if (isFibonacci) {
+			this.clearLine(main, isHorizontal)
+			return {
+				axis: isHorizontal ? 'y' : 'x',
+				coordinate: main,
+				isHorizontal
 			}
-		}
-		const axis1 = horizontal ? x : y
-		const axis2 = horizontal ? y : x
-		const firstLimit = axis1 < offsets[0] ? 0 : axis1 - offsets[0]
-		const secondLimit = axis1 > 49 ? 49 : axis1 + offsets[1]
-		for (let i = 0; i < 50; ++i) {
-			if (i != axis2) {
-				for (let j = firstLimit; j <= secondLimit; ++j) {
-					if (horizontal) {
-						pushValid(results, callback(j, i))
-					} else {
-						pushValid(results, callback(i, j))
-					}
-				}
-			}
-		}
-		return results
-	}
-
-	forCrossAt(
-		x,
-		y,
-		callbacks,
-		offsets = {
-			left: 0,
-			right: 0,
-			centerRight: 0,
-			top: 0,
-			bottom: 0,
-			centerBottom: 0
-		}
-	) {
-		// Horizontal
-		if (callbacks.horizontal) {
-			this.forLineAt(x, y, callbacks.horizontal, true, [
-				offsets.left,
-				offsets.right,
-				offsets.centerRight
-			])
-		}
-		if (callbacks.vertical) {
-			this.forLineAt(x, y, callbacks.vertical, false, [
-				offsets.top,
-				offsets.bottom,
-				offsets.centerBottom
-			])
 		}
 	}
 }

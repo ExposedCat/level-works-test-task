@@ -1,20 +1,29 @@
 let grid = new Grid()
-handleClicks('.grid', 'cell', async cell => {
-	let { x, y } = cell.dataset
-	x = Number(x)
-	y = Number(y)
+
+DomUtils.handleClicks(grid.getContainer(), 'cell', async cell => {
+	const { x, y } = cell.dataset
+	const point = Point(x, y)
+
 	// Increase cell values
-	grid.forLineAt(x, y, grid.increaseCell.bind(grid), true)
-	await grid.highlightCross(x, y, 'yellow', 500)
+	GridUtils.forLineAt(point, grid.increaseCell.bind(grid), true)
+	await grid.highlightLines(
+		[Line('x', x), Line('y', y)],
+		Config.animations.increase.color,
+		Config.animations.increase.time
+	)
+	
 	// Check for Fibonacci sequences
-	for (const horizontal of [true, false]) {
-		const lines = grid.forLineAt(
-			x,
-			y,
-			(x, y) => processNewFibonnaciLines(x, y, grid, horizontal),
-			horizontal,
-			[5, 5, 2]
+	for (const isHorizontal of [true, false]) {
+		const lines = GridUtils.forLineAt(
+			point,
+			point => grid.processNewFibonacciLines(point, isHorizontal),
+			isHorizontal,
+			[Config.offsets.side1, Config.offsets.side2, Config.offsets.limit]
 		)
-		await grid.highlightLines(lines, 'green', 1000)
+		await grid.highlightLines(
+			lines,
+			Config.animations.clear.color,
+			Config.animations.clear.time
+		)
 	}
 })
