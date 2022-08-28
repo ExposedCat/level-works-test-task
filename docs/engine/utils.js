@@ -1,9 +1,19 @@
+/**
+ * Pushes item to the array if item is defined
+ * @param {Array} array
+ * @param {any} item
+ */
 function pushValid(array, item) {
 	if (item !== undefined) {
 		array.push(item)
 	}
 }
 
+/**
+ *
+ * @param {{clicks: number}} - 3 cells to check
+ * @returns {boolean} If cells make a Fibonacci sequence
+ */
 function isFibonacci([n2, n1, n]) {
 	return !!(
 		n2.clicks &&
@@ -13,13 +23,26 @@ function isFibonacci([n2, n1, n]) {
 	)
 }
 
+/**
+ * Represents utilites for DOM
+ */
 class DomUtils {
+	/**
+	 * Creates row DOM element
+	 * @returns {Element}
+	 * @static
+	 */
 	static createRow() {
 		let row = document.createElement('div')
 		row.classList.add('row')
 		return row
 	}
 
+	/**
+	 * Creates cell DOM element
+	 * @param {Point} point
+	 * @returns {Element}
+	 */
 	static createCell(point) {
 		let cell = document.createElement('div')
 		cell.classList.add('cell')
@@ -29,6 +52,12 @@ class DomUtils {
 		return cell
 	}
 
+	/**
+	 * Handles clicks on elements in container
+	 * @param {Element} container
+	 * @param {string} elementClassName - Class name of elements to handle clicks on
+	 * @param {(target: EventTarget | null) => any} callback - Function to call on element on click
+	 */
 	static handleClicks(container, elementClassName, callback) {
 		container.addEventListener('click', ({ target }) => {
 			if (target.classList.contains(elementClassName)) {
@@ -37,6 +66,11 @@ class DomUtils {
 		})
 	}
 
+	/**
+	 * Sets color of specified lines. Uses `<style id='styles'>` element
+	 * @param {Line[]} lines
+	 * @param {string} color
+	 */
 	static setLinesColor(lines, color) {
 		const styles = document.querySelector('#styles')
 		let query = ``
@@ -50,15 +84,26 @@ class DomUtils {
 	}
 }
 
+/**
+ * Represents utilites for grid
+ */
 class GridUtils {
+	/**
+	 * Executes callback for each point at line by offsets to both sides from the point
+	 * @param {Point} point
+	 * @param {(point: Point) => any} callback
+	 * @param {boolean} isHorizontal If should process cells horizontally
+	 * @param {number[]} offsets - Offsets by two sides
+	 * @returns {Promise<any[]>}
+	 */
 	static forLineAt(point, callback, isHorizontal, offsets = [0, 0]) {
 		return new Promise(resolve => {
 			let results = []
 			for (let coord = 0; coord < 50; ++coord) {
 				if (isHorizontal) {
-					pushValid(results, callback(Point(coord, point.y)))
+					pushValid(results, callback(new Point(coord, point.y)))
 				} else {
-					pushValid(results, callback(Point(point.x, coord)))
+					pushValid(results, callback(new Point(point.x, coord)))
 				}
 			}
 			const axis1 = isHorizontal ? point.x : point.y
@@ -73,9 +118,15 @@ class GridUtils {
 						++coord2
 					) {
 						if (isHorizontal) {
-							pushValid(results, callback(Point(coord2, coord1)))
+							pushValid(
+								results,
+								callback(new Point(coord2, coord1))
+							)
 						} else {
-							pushValid(results, callback(Point(coord1, coord2)))
+							pushValid(
+								results,
+								callback(new Point(coord1, coord2))
+							)
 						}
 					}
 				}

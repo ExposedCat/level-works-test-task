@@ -10,25 +10,28 @@ DomUtils.handleClicks(grid.getContainer(), 'cell', async cell => {
 	grid.setCursor(false)
 
 	const { x, y } = cell.dataset
-	const point = Point(x, y)
+	const point = new Point(x, y)
 
 	// Increase cell values
 	await GridUtils.forLineAt(point, grid.increaseCell.bind(grid), true)
-	grid.highlightLines(
-		[Line('x', x), Line('y', y)],
+	grid.blinkLines(
+		[new Line('x', x), new Line('y', y)],
 		Config.animations.increase.color,
 		Config.animations.increase.time
 	)
 
 	// Check for Fibonacci sequences
 	for (const isHorizontal of [true, false]) {
+		/**
+		 * @type {(Line & {isHorizontal: boolean})[]}
+		 */
 		const lines = await GridUtils.forLineAt(
 			point,
-			point => grid.processNewFibonacciLines(point, isHorizontal),
+			point => grid.getFibonacciLines(point, isHorizontal),
 			isHorizontal,
 			[Config.offsets.side1, Config.offsets.side2]
 		)
-		await grid.highlightLines(
+		await grid.blinkLines(
 			lines,
 			Config.animations.clear.color,
 			Config.animations.clear.time
