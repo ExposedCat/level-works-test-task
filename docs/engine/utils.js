@@ -30,9 +30,6 @@ class DomUtils {
 	}
 
 	static handleClicks(container, elementClassName, callback) {
-		if (!container) {
-			throw new Error(`Can't handle clicks: container not found`)
-		}
 		container.addEventListener('click', ({ target }) => {
 			if (target.classList.contains(elementClassName)) {
 				callback(target)
@@ -55,29 +52,35 @@ class DomUtils {
 
 class GridUtils {
 	static forLineAt(point, callback, isHorizontal, offsets = [0, 0]) {
-		let results = []
-		for (let coord = 0; coord < 50; ++coord) {
-			if (isHorizontal) {
-				pushValid(results, callback(Point(coord, point.y)))
-			} else {
-				pushValid(results, callback(Point(point.x, coord)))
+		return new Promise(resolve => {
+			let results = []
+			for (let coord = 0; coord < 50; ++coord) {
+				if (isHorizontal) {
+					pushValid(results, callback(Point(coord, point.y)))
+				} else {
+					pushValid(results, callback(Point(point.x, coord)))
+				}
 			}
-		}
-		const axis1 = isHorizontal ? point.x : point.y
-		const axis2 = isHorizontal ? point.y : point.x
-		const firstLimit = axis1 < offsets[0] ? 0 : axis1 - offsets[0]
-		const secondLimit = axis1 > 49 ? 49 : axis1 + offsets[1]
-		for (let coord1 = 0; coord1 < 50; ++coord1) {
-			if (coord1 != axis2) {
-				for (let coord2 = firstLimit; coord2 <= secondLimit; ++coord2) {
-					if (isHorizontal) {
-						pushValid(results, callback(Point(coord2, coord1)))
-					} else {
-						pushValid(results, callback(Point(coord1, coord2)))
+			const axis1 = isHorizontal ? point.x : point.y
+			const axis2 = isHorizontal ? point.y : point.x
+			const firstLimit = axis1 < offsets[0] ? 0 : axis1 - offsets[0]
+			const secondLimit = axis1 > 49 ? 49 : axis1 + offsets[1]
+			for (let coord1 = 0; coord1 < 50; ++coord1) {
+				if (coord1 != axis2) {
+					for (
+						let coord2 = firstLimit;
+						coord2 <= secondLimit;
+						++coord2
+					) {
+						if (isHorizontal) {
+							pushValid(results, callback(Point(coord2, coord1)))
+						} else {
+							pushValid(results, callback(Point(coord1, coord2)))
+						}
 					}
 				}
 			}
-		}
-		return results
+			resolve(results)
+		})
 	}
 }

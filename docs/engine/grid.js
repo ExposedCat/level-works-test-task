@@ -27,7 +27,14 @@ class Grid {
 	}
 
 	getContainer() {
+		if (!this.#element) {
+			throw new Error(`Container not found`)
+		}
 		return this.#element
+	}
+
+	setCursor(clickable) {
+		this.#element.style.cursor = clickable ? 'pointer' : 'not-allowed'
 	}
 
 	getCell(point, getDOMElement = false) {
@@ -142,7 +149,6 @@ class Grid {
 		let isFibonacci = this.checkLineFromPoint(point, isHorizontal, false)
 		isFibonacci ||= this.checkLineFromPoint(point, isHorizontal, true)
 		if (isFibonacci) {
-			this.clearLine(main, isHorizontal)
 			return {
 				axis: isHorizontal ? 'y' : 'x',
 				coordinate: main,
