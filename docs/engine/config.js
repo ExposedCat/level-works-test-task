@@ -1,12 +1,12 @@
 class Config {
 	static animations = {
 		increase: {
-			color: 'yellow',
+			color: '#FFEE58',
 			time: 500
 		},
 		clear: {
-			color: 'green',
-			time: 500
+			color: '#66BB6A',
+			time: 1500
 		}
 	}
 
