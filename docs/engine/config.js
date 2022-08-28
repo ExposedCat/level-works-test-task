@@ -12,7 +12,6 @@ class Config {
 
 	static offsets = {
 		side1: 5,
-		side2: 5,
-		limit: 2
+		side2: 5
 	}
 }

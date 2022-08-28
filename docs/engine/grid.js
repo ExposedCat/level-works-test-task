@@ -49,21 +49,22 @@ class Grid {
 		}
 	}
 
-	getCellTwoPrev(point, isHorizontal) {
-		const cell = this.getCell(Point(point.x, point.y))
+	getCellTwoPrev(point, isHorizontal, reverse) {
 		let prev1
 		let prev2
+		const multiplier = reverse ? 1 : -1
 		if (isHorizontal) {
-			prev1 = this.getCell(Point(point.x - 1, point.y))
-			prev2 = this.getCell(Point(point.x - 2, point.y))
+			prev1 = Point(point.x + multiplier, point.y)
+			prev2 = Point(point.x + 2 * multiplier, point.y)
 		} else {
-			prev1 = this.getCell(Point(point.x, point.y - 1))
-			prev2 = this.getCell(Point(point.x, point.y - 2))
+			prev1 = Point(point.x, point.y + multiplier)
+			prev2 = Point(point.x, point.y + 2 * multiplier)
 		}
-		return [prev2, prev1, cell]
+		const cell = Point(point.x, point.y)
+		return [this.getCell(prev2), this.getCell(prev1), this.getCell(cell)]
 	}
 
-	checkLineFromPoint(point, isHorizontal) {
+	checkLineFromPoint(point, isHorizontal, reverse) {
 		let axis1 = point.y
 		let axis2 = point.x
 		if (isHorizontal) {
@@ -73,12 +74,21 @@ class Grid {
 		if (axis1 > 45) {
 			return false
 		}
+		const offset = reverse ? 0 : 2
 		for (let coord1 = axis1; coord1 <= axis1 + 2; ++coord1) {
 			let cells
 			if (isHorizontal) {
-				cells = this.getCellTwoPrev(Point(coord1 + 2, axis2), true)
+				cells = this.getCellTwoPrev(
+					Point(coord1 + offset, axis2),
+					true,
+					reverse
+				)
 			} else {
-				cells = this.getCellTwoPrev(Point(axis2, coord1 + 2), false)
+				cells = this.getCellTwoPrev(
+					Point(axis2, coord1 + offset),
+					false,
+					reverse
+				)
 			}
 			if (!isFibonacci(cells)) {
 				return false
@@ -129,7 +139,8 @@ class Grid {
 		if (limit > 47) {
 			return
 		}
-		const isFibonacci = this.checkLineFromPoint(point, isHorizontal)
+		let isFibonacci = this.checkLineFromPoint(point, isHorizontal, false)
+		isFibonacci ||= this.checkLineFromPoint(point, isHorizontal, true)
 		if (isFibonacci) {
 			this.clearLine(main, isHorizontal)
 			return {

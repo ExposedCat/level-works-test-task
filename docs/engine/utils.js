@@ -54,9 +54,9 @@ class DomUtils {
 }
 
 class GridUtils {
-	static forLineAt(point, callback, isHorizontal, offsets = [0, 0, 0]) {
+	static forLineAt(point, callback, isHorizontal, offsets = [0, 0]) {
 		let results = []
-		for (let coord = 0; coord < 50 - offsets[2]; ++coord) {
+		for (let coord = 0; coord < 50; ++coord) {
 			if (isHorizontal) {
 				pushValid(results, callback(Point(coord, point.y)))
 			} else {
