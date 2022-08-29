@@ -21,24 +21,26 @@ DomUtils.handleClicks(grid.getContainer(), 'cell', async cell => {
 	)
 
 	// Check for Fibonacci sequences
+	/**
+	 * @type {(Line & {isHorizontal: boolean})[]}
+	 */
+	let lines = []
 	for (const isHorizontal of [true, false]) {
-		/**
-		 * @type {(Line & {isHorizontal: boolean})[]}
-		 */
-		const lines = await GridUtils.forLineAt(
+		const newLines = await GridUtils.forLineAt(
 			point,
 			point => grid.getFibonacciLines(point, isHorizontal),
 			isHorizontal,
 			[Config.offsets.side1, Config.offsets.side2]
 		)
-		await grid.blinkLines(
-			lines,
-			Config.animations.clear.color,
-			Config.animations.clear.time
-		)
-		for (const { coordinate, isHorizontal } of lines) {
-			grid.clearLine(coordinate, isHorizontal)
-		}
+		lines = lines.concat(newLines)
+	}
+	await grid.blinkLines(
+		lines,
+		Config.animations.clear.color,
+		Config.animations.clear.time
+	)
+	for (const { coordinate, isHorizontal } of lines) {
+		grid.clearLine(coordinate, isHorizontal)
 	}
 
 	// Unlock
